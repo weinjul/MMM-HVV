@@ -1,0 +1,20 @@
+{
+  "name": "mmm-hvv",
+  "version": "0.1.0",
+  "description": "Module for MagicMirror, showing local transport times of Hamburg HVV",
+  "main": "MMM-HVV.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/weinjul/MMM-HVV.git"
+  },
+  "author": "Julian Weinhold",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/weinjul/MMM-HVV/issues"
+  },
+  "homepage": "https://github.com/weinjul/MMM-HVV#readme",
+  "dependencies": {
+    "node-forge": "^1.3.1",
+    "unirest": "^0.6.0"
+  }
+}
