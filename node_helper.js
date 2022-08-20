@@ -72,7 +72,6 @@ module.exports = NodeHelper.create({
         }
         else{data.station = {"id": this.config.stations, "type":"STATION"}}
 
-        Log.info(data)
         self.getSignature(data).then((sig) => {
             unirest.post(url)
             .headers({
@@ -85,7 +84,6 @@ module.exports = NodeHelper.create({
             })
             .send(JSON.stringify(data))
             .then(function(r){
-                Log.info(r.body)
                 self.processTrains(r.body)
             }
             )
