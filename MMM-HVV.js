@@ -6,9 +6,9 @@ Module.register('MMM-HVV', {
         apiuser: "",
         updateInterval: 1 * 60 * 1000,
         apiBase: "https://gti.geofox.de/gti/public/",
-        station: "Master:84952",
-        maximumEntries: 10,
-        maxTimeOffset: 15,
+        stations: "Master:9910950",
+        maximumEntries: 20,
+        maxTimeOffset: 100,
         useRealtime: true,
         version: 51,
 
@@ -43,9 +43,38 @@ Module.register('MMM-HVV', {
             wrapper.className = "dimmed light small";
             return wrapper;
         }
+        var table = document.createElement("table");
+        table.calssName = "small"
 
-        wrapper.innerHTML = this.trains;
-        return wrapper;
+        for(var i in this.trains){
+            var train = this.trains[i];
+
+            var row = document.createElement("tr");
+            table.appendChild(row);
+
+            var logoCell = document.createElement("td");
+            const image = document.createElement("img");
+            image.src = 'https://cloud.geofox.de/icon/line?height=14&lineKey=' + train.id;
+            Log.info(image.src);
+            logoCell.appendChild(image);
+            row.appendChild(logoCell);
+
+            var trainToCell = document.createElement("td");
+            trainToCell.innerHTML = train.to;
+            trainToCell.className = "trainto";
+            row.appendChild(trainToCell);
+
+            var depCell = document.createElement("td");
+            depCell.calssName = "departureTime";
+            if(train.departureTimestamp == 0){
+                depCell.innerHTML = "now";
+            }
+            else{depCell.innerHTML = train.departureTimestamp + " Minuten"}
+            row.appendChild(depCell);
+
+        }
+        
+        return table
     },
 
     socketNotificationReceived: function(notification, payload){

@@ -11,7 +11,32 @@ module.exports = NodeHelper.create({
     },
 
     processTrains: function(payload){
-        Log.log(payload);
+        this.trains = [];
+        /*var time = payload.time.time.split(":");
+        var datetime = new Date(parseDate(payload.time.date));
+        datetime.setHours(time[0]);
+        datetime.setMinutes(time[1]);*/
+        for(var i = 0, count = payload.departures.length; i < count; i++){
+            var train = payload.departures[i];
+            if(train.timeOffset < 0){
+                continue;
+            }
+            var delay;
+            if(train.delay != 0 && train.delay != undefined){
+                delay = train.delay;
+            }
+            else{delay = null};
+            this.trains.push({
+                "departureTimestamp": train.timeOffset,
+                "delay": delay,
+                "name": train.line.name,
+                "to": train.line.direction,
+                "id": train.line.id, 
+            })
+        };
+        this.loaded = true;
+        this.sendSocketNotification("TRAINS", this.trains);
+
     },
 
     getSignature: function(data){
@@ -28,17 +53,26 @@ module.exports = NodeHelper.create({
     updateTable: function() {
         var url = this.config.apiBase + 'departureList';
         var self = this;
+
         var data = {
-            "station": {
-                "id": this.config.station,
-                "type": "STATION"
-            },
             "time":{},
             "maxList": this.config.maximumEntries,
             "maxTimeOffset": this.config.maxTimeOffset,
             "useRealtime": this.config.useRealtime,
             "version": this.config.version,
         };
+
+        if(Array.isArray(this.config.stations)){
+
+            var stations = [];
+            for(i in this.config.stations){
+                stations.push({"id": this.config.stations[i], "type":"STATION"});
+            }
+            data.stations = stations;
+        }
+        else{data.station = {"id": this.config.stations, "type":"STATION"}}
+
+        Log.info(data)
         self.getSignature(data).then((sig) => {
             unirest.post(url)
             .headers({
@@ -51,6 +85,7 @@ module.exports = NodeHelper.create({
             })
             .send(JSON.stringify(data))
             .then(function(r){
+                Log.info(r.body)
                 self.processTrains(r.body)
             }
             )
@@ -58,7 +93,6 @@ module.exports = NodeHelper.create({
     },
 
     socketNotificationReceived: function(notification, payload){
-        Log.info("Notification Received")
         const self = this;
         if(notification === 'START_HVV' && this.started == false){
             this.config = payload;
@@ -66,6 +100,7 @@ module.exports = NodeHelper.create({
             setInterval(() => {
                 self.updateTable();
             }, this.config.updateInterval);
+            self.updateTable();
         }
     }
 })
